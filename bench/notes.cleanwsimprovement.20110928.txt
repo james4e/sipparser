@@ -1,0 +1,56 @@
+**NOTE**
+this is a top 20 sample I took before modifying the cleanWs function in 
+sip_parser/src/utils.go.
+
+The initial version of cleanWs looped through each char in the string
+and compared characters.  This version occupied 80%+ of the time in
+the bench program.  The new version uses the strings package to trim the 
+space at the end of the line then loop through the returned slice of strings.
+The net result is a 7X improvement in speed of the bench program and a reduction
+of the time spent to just over 20%.   
+
+before the modification:
+Total: 1802 samples
+     203  11.3%  11.3%     1098  60.9% runtime.mallocgc
+     128   7.1%  18.4%      347  19.3% sweep
+     112   6.2%  24.6%      129   7.2% MCentral_Alloc
+     110   6.1%  30.7%     1494  82.9% sipparser.cleanWs
+      92   5.1%  35.8%      434  24.1% runtime.MCache_Alloc
+      89   4.9%  40.7%      598  33.2% concatstring
+      85   4.7%  45.4%       85   4.7% runtime.mcpy
+      80   4.4%  49.9%       80   4.4% runtime.memclr
+      79   4.4%  54.3%      229  12.7% runtime.MCache_Free
+      75   4.2%  58.4%     1124  62.4% runtime.gostringsize
+      70   3.9%  62.3%      120   6.7% MCentral_Free
+      60   3.3%  65.6%      756  42.0% runtime.intstring
+      53   2.9%  68.6%       53   2.9% runtime.markallocated
+      50   2.8%  71.4%       50   2.8% runtime.stringiter
+      50   2.8%  74.1%       50   2.8% scanblock
+      44   2.4%  76.6%       44   2.4% runtime.SizeToClass
+      41   2.3%  78.9%       41   2.3% runtime.MHeap_Lookup
+      40   2.2%  81.1%       40   2.2% runtime.markspan
+      33   1.8%  82.9%       33   1.8% runtime.MSpanList_IsEmpty
+      30   1.7%  84.6%      341  18.9% runtime.MCentral_AllocList
+
+after the modification:
+Total: 254 samples
+      18   7.1%   7.1%       18   7.1% runtime.stringiter
+      14   5.5%  12.6%       38  15.0% sipparser.getCrlf
+      13   5.1%  17.7%       14   5.5% sipparser.getHdrFunc
+      11   4.3%  22.0%       11   4.3% MCentral_Alloc
+       9   3.5%  25.6%       78  30.7% runtime.mallocgc
+       9   3.5%  29.1%        9   3.5% strings.Count
+       9   3.5%  32.7%       22   8.7% sweep
+       8   3.1%  35.8%       38  15.0% runtime.MCache_Alloc
+       6   2.4%  38.2%       12   4.7% MHeap_AllocLocked
+       6   2.4%  40.6%       14   5.5% runtime.MCache_Free
+       6   2.4%  42.9%       30  11.8% runtime.makeslice
+       6   2.4%  45.3%       60  23.6% sipparser.cleanWs
+       6   2.4%  47.6%      184  72.4% sipparser.getHeaders
+       5   2.0%  49.6%        6   2.4% MCentral_Free
+       5   2.0%  51.6%       19   7.5% runtime.growslice
+       5   2.0%  53.5%        5   2.0% scanblock
+       5   2.0%  55.5%        9   3.5% sipparser.getBracks
+       5   2.0%  57.5%       33  13.0% sipparser.parseUriHost
+       5   2.0%  59.4%       30  11.8% strings.Map
+       4   1.6%  61.0%       34  13.4% makeslice1
