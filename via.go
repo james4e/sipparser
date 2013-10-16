@@ -12,15 +12,18 @@ import (
 
 type viaStateFn func(v *Via) viaStateFn
 
+// Via is an important part of the *SipMsg.  It is a fundamental
+// basis on which to build route-sets and do call matching.  It
+// has the following structs:
 type Via struct {
-	State      string
-	Error      error
-	Via        string
-	Proto      string
-	Version    string
-	Transport  string
-	SentBy     string
-	Branch     string
+	State      string // State is the parser state
+	Error      error // Error is an error
+	Via        string // Via is the raw value
+	Proto      string // Proto is the protocol (i.e. "SIP")
+	Version    string // Version is the version (i.e. "2.0")
+	Transport  string // Transport is the transport method (i.e. "UDP")
+	SentBy     string // SentBy is a host:port combination 
+	Branch     string // Branch is the branch parameter
 	Received   string
 	RPort      string
 	Params     []*Param

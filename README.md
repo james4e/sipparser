@@ -1,6 +1,6 @@
 sipparser
 =========
-
+[![Build Status](https://drone.io/github.com/danielvargas/sipparser/status.png)](https://drone.io/github.com/danielvargas/sipparser/latest) [![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/danielvargas/sipparser)
 ###About
 
 sipparser is a high performce parser for Session Initiated
@@ -10,215 +10,68 @@ parse SIP messages.
 
 ###Installation
 
-(the following steps assume that you have mercurial and go
+(the following step assume that you have git and go
 installed already)
-1. hg clone https://sdr@bitbucket.org/sdr/sip_parser
-2. cd sip_parser
-3. make clean && make && make install
+```shell
+git get github.com/danielvargas/sipparser
+```
 
-
-Usage
+###Usage
 
 The library has an easy to use interface.  
 
-1. call sipparser.ParseMsg(msg string)
-2. you'll get back a *SipMsg struct with the following:
-    -- State is the last parsing state
-    -- Error is an os.Error
-    -- Msg is the raw msg
-    -- CallingParty is a *CallingParty struct (see below)
-    -- Body is the body of the message
-    -- StartLine is the parsed StartLine (see below)
-    -- Headers is a slice of *Headers (see below) and will
-       only contain headers that do not get parsed 
-    -- Accept is a *Accept struct (see below)
-    -- AlertInfo is just the string of the Alert-Info hdr
-    -- Allow is a slice of strings of the methods that are 
-       allowed
-    -- AllowEvents is a slice of strings of the supported
-       event types
-    -- ContentDisposition is a *ContentDisposition struct 
-    -- ContentLength is the value of the Content-Length hdr
-    -- ContentLengthInt is the int value of the ContentLength
-    -- ContentType is the header value for the Content-Type hdr
-    -- From is a *From struct (see below)
-    -- MaxForwards is the hdr value for the Max-Forwards hdr
-    -- MaxForwardsInt is the int value of the MaxForwards field
-    -- Organization is the value for the Organization hdr
-    -- To is a *From struct (see below)
-    -- Contact is a *From struct (see below) 
-       ** NOTE ** Contact is not parsed automatically.  You 
-       have to call *SipMsg.ParseContact() to get this value.
-    -- ContactVal is the raw value of the contact hdr
-    -- CallId is the call-id for the message
-    -- Cseq is a *Cseq struct (see below)
-    -- Rack is a *Rack struct (see below)
-    -- Reason is a *Reason struct
-    -- Rseq is the value of the RSeq hdr
-    -- RseqInt is the int value of the Rseq
-    -- RecordRoute is a slice of *URI's structs (see below)
-    -- Route is a slice of *URI's structs (see below) 
-    -- Via is a slice of *Via structs (see below)
-    -- Require is a slice of the required extensions (string
-       values) from the Require hdr
-    -- Supported is a slice of the supported extensions (string
-       values) from the Supported hdr
-    -- Privacy is the value of the Privacy hdr
-    -- ProxyRequire is a slice of strings from the 
-       Proxy-Require hdr
-    -- RemotePartyIdVal is the value from the Remote-Party-Id hdr
-    -- RemotePartyId is the RemotePartyId struct 
-       ** NOTE ** In order to actually get this value you have to
-       call *SipMsg.ParseRemotePartyId()
-    -- PAssertedIdVal is the value from the P-Asserted-Identity hdr
-    -- PAssertedId is the *PAssertedId struct
-       ** NOTE ** In order to actually get this value you have to 
-       call *SipMsg.ParsePAssertedId()
-    -- Unsupported is a slice of the unsupported extensions from
-       the Unsupported hdr
-    -- UserAgent is the value of the User-Agent hdr
-    -- Server is the value of the Server hdr
-    -- Subject is the value of the Subject hdr
-    -- Warning is a *Warning struct (see below)
-
-Import Types 
-
-The following types are also part of the parsed SIP message. 
-
-Accept is a struct with the following fields:
--- Val is the raw value
--- Params is a slice of AcceptParam
-
-CallingPartyInfo is a struct of calling party information.  
-This is populated into the *SipMsg.CallingParty field when 
-the method GetCallingParty on the *SipMsg.  See below for 
-details of that method.
-CallingPartyInfo has the following fields:
--- Name the name
--- Number the number
--- Anonymous a bool to see if this should be anonymous or not
-
-
-ContentDisposition is a struct with the following fields:
--- Val is the raw value
--- DispType is the display type
--- Params is a slice of *Param (see below)
-
-Cseq is a struct with the following fields:
--- Val is the raw value
--- Method is the SIP method
--- Digit is the digit (although in a string format)
-
-From is an important type that is used as a representation of
-the parsed hdr values for the From, To, and Contact headers.
-The From struct has the following fields:
--- Error is an os.Error
--- Val is the raw value
--- Name is the name value from the hdr
--- Tag is the value of the tag=$someval parameter
--- URI is the *URI 
--- Params is a slice of *Param (see below)
-
-Param is a struct with the following fields:
--- Param is the parameter 
--- Val is the value of the parameter (if any ...)
-
-PAssertedId is a struct with the following fields:
--- Error is an os.Error
--- Val is the raw value
--- Name is the name from the header
--- URI is the *URI
--- Params is a slice of *Param
-
-Rack is a struct with the following fields:
--- Val is the raw value
--- RseqVal is the value of the rseq
--- CseqVal is the value of the cseq
--- CseqMethod is the value of the cseq method
-
-Reason is a struct with the following fields:
--- Val is the raw value
--- Proto is the protocol
--- Cause is the cause code
--- Text is the text
-
-RemotePartyId is a struct with the following fields:
--- Error is an os.Error
--- Val is the raw value of the hdr
--- Name is the name from the header
--- URI is the *URI
--- Party is the party parameter
--- Screen is the screen parameter 
--- Privacy is the privacy parameeter
--- Params is a slice of *Param
-
-StartLine is a struct with the following fields:
--- Error is an os.Error
--- Val is the raw value
--- Type is the type of startline (i.e. request or response)
--- Method is the method (if request)
--- URI is the *URI (if request) 
--- Resp is the response code (i.e. 183)
--- RespText is the response text (i.e. "Session Progress")
--- Proto is the protocol (should be "SIP")
--- Version is the version (should be "2.0")
-
-URI is an important struct that is used in many places 
-through a *SipMsg from the From header to the StartLine.
-It has the following fields:
--- Error is an os.Error
--- Scheme is the scheme (i.e. "sip", "sips", "tel")
--- Raw is the raw value of the uri 
--- UserInfo is everything before the "@" char if anything 
--- User is the user (i.e. "bob")
--- UserPassword is the password (if any) 
--- HostInfo is everything between the "@" char and any parameters
--- Host is the host
--- Port is the port
--- UriParams is a slice of *Param
--- Secure is a bool indicating if communication is secure 
-
-Via is an important part of the *SipMsg.  It is a fundamental
-basis on which to build route-sets and do call matching.  It
-has the following structs:
--- State is the parser state
--- Error is an os.Error
--- Via is the raw value
--- Proto is the protocol (i.e. "SIP")
--- Version is the version (i.e. "2.0")
--- Transport is the transport method (i.e. "UDP")
--- SentBy is a host:port combination 
--- Branch is the branch parameter
--- Params is a slice of *Param
-
-Import Methods on the *SipMsg
-
-GetCallingParty
-
-GetCallingParty is a method that can be called with one of 
-the following:
--- rpid (abbr for remote-party-id)
--- paid (abbr for party-associated-identity)
-If either of the above parameters are passed to the method
-then it will use one of the matching hdrs to obtain the info.
-If anything else is passed then it will pull the CallingPartyInfo
-from the from header.
-
-GetRURIParamBool
-
-GetRURIParamBool returns true or false to see if a parameter
-is present in the request URI
-
-GetRURIParamVal 
-
-GetRURIParamVal returns the actual value of the parameter if
-the parameter is present in the request URI
+* call sipparser.ParseMsg(msg string)
+* you'll get back a *SipMsg struct with the following:
+    + State is the last parsing state
+    + Error is an os.Error
+    + Msg is the raw msg
+    + CallingParty is a *CallingParty struct 
+    + Body is the body of the message
+    + StartLine is the parsed StartLine 
+    + Headers is a slice of *Headers and will only contain headers that do not get parsed 
+    + Accept is a *Accept struct 
+    + AlertInfo is just the string of the Alert-Info hdr
+    + Allow is a slice of strings of the methods that are allowed
+    + AllowEvents is a slice of strings of the supported event types
+    + ContentDisposition is a *ContentDisposition struct 
+    + ContentLength is the value of the Content-Length hdr
+    + ContentLengthInt is the int value of the ContentLength
+    + ContentType is the header value for the Content-Type hdr
+    +  From is a *From struct 
+    + MaxForwards is the hdr value for the Max-Forwards hdr
+    + MaxForwardsInt is the int value of the MaxForwards field
+    + Organization is the value for the Organization hdr
+    + To is a *From struct
+    + Contact is a *From struct ** NOTE ** Contact is not parsed automatically. You have to call *SipMsg.ParseContact() to get this value.
+    + ContactVal is the raw value of the contact hdr
+    + CallId is the call-id for the message
+    + Cseq is a *Cseq struct
+    + Rack is a *Rack struct
+    + Reason is a *Reason struct
+    + Rseq is the value of the RSeq hdr
+    + RseqInt is the int value of the Rseq
+    + RecordRoute is a slice of *URI's structs
+    + Route is a slice of *URI's structs 
+    + Via is a slice of *Via structs
+    + Require is a slice of the required extensions (string values) from the Require hdr
+    + Supported is a slice of the supported extensions (string values) from the Supported hdr
+    + Privacy is the value of the Privacy hdr
+    + ProxyRequire is a slice of strings from the Proxy-Require hdr
+    + RemotePartyIdVal is the value from the Remote-Party-Id hdr
+    + RemotePartyId is the RemotePartyId struct ** NOTE ** In order to actually get this value you have to call *SipMsg.ParseRemotePartyId()
+    + PAssertedIdVal is the value from the P-Asserted-Identity hdr
+    + PAssertedId is the *PAssertedId struct ** NOTE ** In order to actually get this value you have to call *SipMsg.ParsePAssertedId()
+    + Unsupported is a slice of the unsupported extensions from the Unsupported hdr
+    + UserAgent is the value of the User-Agent hdr
+    + Server is the value of the Server hdr
+    + Subject is the value of the Subject hdr
+    + Warning is a *Warning struct
 
 ###SIP grammar from RFC3261
 ```
    alphanum  =  ALPHA / DIGIT
 
-   reserved    =  ";" / "/" / "?" / ":" / "@" / "&" / "=" / "+"
+   reserved    =  ";" / "/" / "?" / ":" / "@" / "&" / "=" / "+ "
                   / "$" / ","
    unreserved  =  alphanum / mark
    mark        =  "-" / "_" / "." / "!" / "~" / "*" / "'"
@@ -242,13 +95,13 @@ the parameter is present in the request URI
    LHEX  =  DIGIT / %x61-66 ;lowercase a-f
 
    token       =  1*(alphanum / "-" / "." / "!" / "%" / "*"
-                  / "_" / "+" / "`" / "'" / "~" )
+                  / "_" / "+ " / "`" / "'" / "~" )
    separators  =  "(" / ")" / "<" / ">" / "@" /
                   "," / ";" / ":" / "\" / DQUOTE /
                   "/" / "[" / "]" / "?" / "=" /
                   "{" / "}" / SP / HTAB
    word        =  1*(alphanum / "-" / "." / "!" / "%" / "*" /
-                  "_" / "+" / "`" / "'" / "~" /
+                  "_" / "+ " / "`" / "'" / "~" /
                   "(" / ")" / "<" / ">" /
                   ":" / "\" / DQUOTE /
                   "/" / "[" / "]" / "?" /
@@ -284,9 +137,9 @@ the parameter is present in the request URI
                        uri-parameters [ headers ]
    userinfo         =  ( user / telephone-subscriber ) [ ":" password ] "@"
    user             =  1*( unreserved / escaped / user-unreserved )
-   user-unreserved  =  "&" / "=" / "+" / "$" / "," / ";" / "?" / "/"
+   user-unreserved  =  "&" / "=" / "+ " / "$" / "," / ";" / "?" / "/"
    password         =  *( unreserved / escaped /
-                       "&" / "=" / "+" / "$" / "," )
+                       "&" / "=" / "+ " / "$" / "," )
    hostport         =  host [ ":" port ]
    host             =  hostname / IPv4address / IPv6reference
    hostname         =  *( domainlabel "." ) toplabel [ "." ]
@@ -318,13 +171,13 @@ the parameter is present in the request URI
    pname             =  1*paramchar
    pvalue            =  1*paramchar
    paramchar         =  param-unreserved / unreserved / escaped
-   param-unreserved  =  "[" / "]" / "/" / ":" / "&" / "+" / "$"
+   param-unreserved  =  "[" / "]" / "/" / ":" / "&" / "+ " / "$"
 
    headers         =  "?" header *( "&" header )
    header          =  hname "=" hvalue
    hname           =  1*( hnv-unreserved / unreserved / escaped )
    hvalue          =  *( hnv-unreserved / unreserved / escaped )
-   hnv-unreserved  =  "[" / "]" / "/" / "?" / ":" / "+" / "$"
+   hnv-unreserved  =  "[" / "]" / "/" / "?" / ":" / "+ " / "$"
 
    SIP-message    =  Request / Response
    Request        =  Request-Line
@@ -340,17 +193,17 @@ the parameter is present in the request URI
    opaque-part    =  uric-no-slash *uric
    uric           =  reserved / unreserved / escaped
    uric-no-slash  =  unreserved / escaped / ";" / "?" / ":" / "@"
-                     / "&" / "=" / "+" / "$" / ","
+                     / "&" / "=" / "+ " / "$" / ","
    path-segments  =  segment *( "/" segment )
    segment        =  *pchar *( ";" param )
    param          =  *pchar
    pchar          =  unreserved / escaped /
-                     ":" / "@" / "&" / "=" / "+" / "$" / ","
-   scheme         =  ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+                     ":" / "@" / "&" / "=" / "+ " / "$" / ","
+   scheme         =  ALPHA *( ALPHA / DIGIT / "+ " / "-" / "." )
    authority      =  srvr / reg-name
    srvr           =  [ [ userinfo "@" ] hostport ]
    reg-name       =  1*( unreserved / escaped / "$" / ","
-                     / ";" / ":" / "@" / "&" / "=" / "+" )
+                     / ";" / ":" / "@" / "&" / "=" / "+ " )
    query          =  *uric
    SIP-Version    =  "SIP" "/" 1*DIGIT "." 1*DIGIT
 
@@ -751,3 +604,66 @@ the parameter is present in the request URI
    header-value      =  *(TEXT-UTF8char / UTF8-CONT / LWS)
    message-body  =  *OCTET
 ```
+###Note: cleanWs improvement
+
+```
+This is a top 20 sample I took before modifying the cleanWs function in 
+sipparser/utils.go.
+
+The initial version of cleanWs looped through each char in the string
+and compared characters.  This version occupied 80%+  of the time in
+the bench program.  The new version uses the strings package to trim the 
+space at the end of the line then loop through the returned slice of strings.
+The net result is a 7X improvement in speed of the bench program and a reduction
+of the time spent to just over 20%.   
+
+before the modification:
+Total: 1802 samples
+     203  11.3%  11.3%     1098  60.9% runtime.mallocgc
+     128   7.1%  18.4%      347  19.3% sweep
+     112   6.2%  24.6%      129   7.2% MCentral_Alloc
+     110   6.1%  30.7%     1494  82.9% sipparser.cleanWs
+      92   5.1%  35.8%      434  24.1% runtime.MCache_Alloc
+      89   4.9%  40.7%      598  33.2% concatstring
+      85   4.7%  45.4%       85   4.7% runtime.mcpy
+      80   4.4%  49.9%       80   4.4% runtime.memclr
+      79   4.4%  54.3%      229  12.7% runtime.MCache_Free
+      75   4.2%  58.4%     1124  62.4% runtime.gostringsize
+      70   3.9%  62.3%      120   6.7% MCentral_Free
+      60   3.3%  65.6%      756  42.0% runtime.intstring
+      53   2.9%  68.6%       53   2.9% runtime.markallocated
+      50   2.8%  71.4%       50   2.8% runtime.stringiter
+      50   2.8%  74.1%       50   2.8% scanblock
+      44   2.4%  76.6%       44   2.4% runtime.SizeToClass
+      41   2.3%  78.9%       41   2.3% runtime.MHeap_Lookup
+      40   2.2%  81.1%       40   2.2% runtime.markspan
+      33   1.8%  82.9%       33   1.8% runtime.MSpanList_IsEmpty
+      30   1.7%  84.6%      341  18.9% runtime.MCentral_AllocList
+
+after the modification:
+Total: 254 samples
+      18   7.1%   7.1%       18   7.1% runtime.stringiter
+      14   5.5%  12.6%       38  15.0% sipparser.getCrlf
+      13   5.1%  17.7%       14   5.5% sipparser.getHdrFunc
+      11   4.3%  22.0%       11   4.3% MCentral_Alloc
+       9   3.5%  25.6%       78  30.7% runtime.mallocgc
+       9   3.5%  29.1%        9   3.5% strings.Count
+       9   3.5%  32.7%       22   8.7% sweep
+       8   3.1%  35.8%       38  15.0% runtime.MCache_Alloc
+       6   2.4%  38.2%       12   4.7% MHeap_AllocLocked
+       6   2.4%  40.6%       14   5.5% runtime.MCache_Free
+       6   2.4%  42.9%       30  11.8% runtime.makeslice
+       6   2.4%  45.3%       60  23.6% sipparser.cleanWs
+       6   2.4%  47.6%      184  72.4% sipparser.getHeaders
+       5   2.0%  49.6%        6   2.4% MCentral_Free
+       5   2.0%  51.6%       19   7.5% runtime.growslice
+       5   2.0%  53.5%        5   2.0% scanblock
+       5   2.0%  55.5%        9   3.5% sipparser.getBracks
+       5   2.0%  57.5%       33  13.0% sipparser.parseUriHost
+       5   2.0%  59.4%       30  11.8% strings.Map
+       4   1.6%  61.0%       34  13.4% makeslice1
+```
+
+###License
+
+The project is governed by a BSD license that can be found in the LICENSE.txt file.

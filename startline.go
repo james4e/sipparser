@@ -35,14 +35,14 @@ type parseStartLineStateFn func(s *StartLine) parseStartLineStateFn
 
 type StartLine struct {
 	Error    error  "err"
-	Val      string "val"
-	Type     string "type"
-	Method   string "method"
-	URI      *URI   "uri"
-	Resp     string "resp"
-	RespText string "resptext"
-	Proto    string "proto"
-	Version  string "version"
+	Val      string "val" // Val is the raw value
+	Type     string "type" // Type is the type of startline (i.e. request or response)
+	Method   string "method" // Method is the method (if request)
+	URI      *URI   "uri" // URI is the *URI (if request)
+	Resp     string "resp" // Resp is the response code (i.e. 183)
+	RespText string "resptext" // RespText is the response text (i.e. "Session Progress")
+	Proto    string "proto" // Proto is the protocol (should be "SIP")
+	Version  string "version" // Version is the version (should be "2.0")
 }
 
 func (s *StartLine) run() {

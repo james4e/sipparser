@@ -21,9 +21,16 @@ const (
 	CALLING_PARTY_PAID        = "paid"
 )
 
+// CallingPartyInfo is a struct of calling party information.  
+// This is populated into the *SipMsg.CallingParty field when 
+// the method GetCallingParty on the *SipMsg.  See below for 
+// details of that method.
 type CallingPartyInfo struct {
+        // Name the name
 	Name      string
+	// Number the number
 	Number    string
+	// Anonymous a bool to see if this should be anonymous or not
 	Anonymous bool
 }
 

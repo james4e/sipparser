@@ -15,8 +15,11 @@ import (
 //  -- Method is the SIP method
 //  -- Digit is the numeric indicator for the method
 type Cseq struct {
+	// Val is the raw value
 	Val    string
+	// Method is the SIP method
 	Method string
+	// Digit is the digit
 	Digit  string
 }
 

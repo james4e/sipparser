@@ -15,8 +15,11 @@ import (
 // -- DispType is the display type
 // -- Params is slice of parameters
 type ContentDisposition struct {
+	// Val is the raw value
 	Val      string
+	// DispType is the display type
 	DispType string
+	// Params is a slice of *Param
 	Params   []*Param
 }
 

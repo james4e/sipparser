@@ -9,17 +9,11 @@ import (
 	"errors"
 )
 
-// Rack is a struct that holds the parsed rack hdr
-// The fields are as follows:
-// -- Val is the raw value
-// -- RseqVal is the rseq value from the rack hdr
-// -- CseqVal is the cseq value from the rack hdr
-// -- CseqMethod is the method from the cseq hdr
 type Rack struct {
-	Val        string
-	RseqVal    string
-	CseqVal    string
-	CseqMethod string
+	Val        string  // Val is the raw value
+	RseqVal    string  // RseqVal is the value of the rseq
+	CseqVal    string  // CseqVal is the value of the cseq
+	CseqMethod string  // CseqMethod is the value of the cseq method
 }
 
 // parse parses the .Val of the Rack struct

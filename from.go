@@ -17,19 +17,18 @@ type parseFromStateFn func(f *From) parseFromStateFn
 // and is used for the parsing of the from, to, and
 // contact header in the parser program
 // From holds the following public fields:
-// -- Error is an error
-// -- Val is the raw value
-// -- Name is the name value
-// -- Tag is the tag value
-// -- URI is a parsed uri
-// -- Params are for any generic params that are part of
-//    the header
 type From struct {
+	// Error is an error
 	Error      error
+	// Val is the raw value
 	Val        string
+	// Name is the name value
 	Name       string
+	// Tag is the tag value
 	Tag        string
+	// URI is a parsed uri
 	URI        *URI
+	// Params are for any generic params that are part of the header
 	Params     []*Param
 	endName    int
 	rightBrack int
