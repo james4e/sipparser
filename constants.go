@@ -28,7 +28,7 @@ const (
 	SIP_HDR_ACCEPT                        = "accept"          // RFC3261
 	SIP_HDR_ACCEPT_CONTACT                = "accept-contact"  // RFC3841
 	SIP_HDR_ACCEPT_CONTACT_CMP            = "a"               // RFC3841
-	SIP_HDR_ACCEPT_ENCODING               = "accept-encoding" // 
+	SIP_HDR_ACCEPT_ENCODING               = "accept-encoding" //
 	SIP_HDR_ACCEPT_LANGUAGE               = "accept-language"
 	SIP_HDR_ACCEPT_RESOURCE_PRIORITY      = "accept-resource-priority" // RFC4412
 	SIP_HDR_ALERT_INFO                    = "alert-info"
@@ -59,7 +59,7 @@ const (
 	SIP_HDR_FLOW_TIMER                    = "flow-timer"
 	SIP_HDR_FROM                          = "from"
 	SIP_HDR_FROM_CMP                      = "f"
-	SIP_HDR_HISTORY_INFO                  = "history-info"  // from RFC 4244 
+	SIP_HDR_HISTORY_INFO                  = "history-info"  // from RFC 4244
 	SIP_HDR_IDENTITY                      = "identity"      // RFC 4474
 	SIP_HDR_IDENTITY_CMP                  = "y"             // RFC 4474
 	SIP_HDR_IDENTITY_INFO                 = "identity-info" // RFC 4474
@@ -85,7 +85,7 @@ const (
 	SIP_HDR_REFER_SUB                     = "refer-sub"                     // RFC4488
 	SIP_HDR_REFER_TO                      = "refer-to"                      // RFC 3515, RFC 4508
 	SIP_HDR_REFERRED_BY                   = "referred-by"                   // RFC3892
-	SIP_HDR_REFERRED_BY_CMP               = "b"                             // RFC3892  
+	SIP_HDR_REFERRED_BY_CMP               = "b"                             // RFC3892
 	SIP_HDR_REJECT_CONTACT                = "reject-contact"                // RFC3841
 	SIP_HDR_REJECT_CONTACT_CMP            = "j"                             // RFC3841
 	SIP_HDR_REMOTE_PARTY_ID               = "remote-party-id"               // DRAFT
@@ -93,7 +93,7 @@ const (
 	SIP_HDR_REPLY_TO                      = "reply-to"                      // RFC3261
 	SIP_HDR_REQUEST_DISPOSITION           = "request-disposition"           // RFC3841
 	SIP_HDR_REQUIRE                       = "require"                       // RFC3261
-	SIP_HDR_RESOURCE_PRIORITY             = "resource-priority"             // RFC4412  
+	SIP_HDR_RESOURCE_PRIORITY             = "resource-priority"             // RFC4412
 	SIP_HDR_RETRY_AFTER                   = "retry-after"                   // RFC3261
 	SIP_HDR_ROUTE                         = "route"                         // RFC3261
 	SIP_HDR_RSEQ                          = "rseq"                          // RFC3262
@@ -112,7 +112,7 @@ const (
 	SIP_HDR_SUPPORTED                     = "supported"                     // RFC3261
 	SIP_HDR_SUPPORTED_CMP                 = "k"                             // RFC3261
 	SIP_HDR_SUPPRESS_IF_MATCH             = "suppress-if-match"             // RFC5839
-	SIP_HDR_TARGET_DIALOG                 = "target-dialog"                 // RFC4538  
+	SIP_HDR_TARGET_DIALOG                 = "target-dialog"                 // RFC4538
 	SIP_HDR_TIMESTAMP                     = "timestamp"                     // RFC3261
 	SIP_HDR_TO                            = "to"                            // RFC3261
 	SIP_HDR_TO_CMP                        = "t"                             // RFC3261
