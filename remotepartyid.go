@@ -13,8 +13,8 @@ type parseRpidStateFn func(r *RemotePartyId) parseRpidStateFn
 
 type RemotePartyId struct {
 	Error   error
-	Val     string  // Val is the raw value of the hdr
-	Name    string  // Name is the name from the header
+	Val     string // Val is the raw value of the hdr
+	Name    string // Name is the name from the header
 	URI     *URI
 	Party   string
 	Screen  string

@@ -17,12 +17,12 @@ type viaStateFn func(v *Via) viaStateFn
 // has the following structs:
 type Via struct {
 	State      string // State is the parser state
-	Error      error // Error is an error
+	Error      error  // Error is an error
 	Via        string // Via is the raw value
 	Proto      string // Proto is the protocol (i.e. "SIP")
 	Version    string // Version is the version (i.e. "2.0")
 	Transport  string // Transport is the transport method (i.e. "UDP")
-	SentBy     string // SentBy is a host:port combination 
+	SentBy     string // SentBy is a host:port combination
 	Branch     string // Branch is the branch parameter
 	Received   string
 	RPort      string

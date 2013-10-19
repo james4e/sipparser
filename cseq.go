@@ -16,11 +16,11 @@ import (
 //  -- Digit is the numeric indicator for the method
 type Cseq struct {
 	// Val is the raw value
-	Val    string
+	Val string
 	// Method is the SIP method
 	Method string
 	// Digit is the digit
-	Digit  string
+	Digit string
 }
 
 func (c *Cseq) parse() error {

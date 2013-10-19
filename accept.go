@@ -19,7 +19,7 @@ type AcceptParam struct {
 // -- a slice of parced AcceptParam
 type Accept struct {
 	// Val is the raw value
-	Val    string
+	Val string
 	// Params is a slice of AcceptParam
 	Params []*AcceptParam
 }

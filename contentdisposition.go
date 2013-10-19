@@ -16,11 +16,11 @@ import (
 // -- Params is slice of parameters
 type ContentDisposition struct {
 	// Val is the raw value
-	Val      string
+	Val string
 	// DispType is the display type
 	DispType string
 	// Params is a slice of *Param
-	Params   []*Param
+	Params []*Param
 }
 
 func (c *ContentDisposition) addParam(s string) {

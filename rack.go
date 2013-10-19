@@ -10,10 +10,10 @@ import (
 )
 
 type Rack struct {
-	Val        string  // Val is the raw value
-	RseqVal    string  // RseqVal is the value of the rseq
-	CseqVal    string  // CseqVal is the value of the cseq
-	CseqMethod string  // CseqMethod is the value of the cseq method
+	Val        string // Val is the raw value
+	RseqVal    string // RseqVal is the value of the rseq
+	CseqVal    string // CseqVal is the value of the cseq
+	CseqMethod string // CseqMethod is the value of the cseq method
 }
 
 // parse parses the .Val of the Rack struct
