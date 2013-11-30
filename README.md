@@ -1,669 +1,637 @@
-sipparser
-=========
-[![Build Status](https://drone.io/github.com/danielvargas/sipparser/status.png)](https://drone.io/github.com/danielvargas/sipparser/latest) [![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/danielvargas/sipparser)
-###About
+# sipparser [![Build Status](https://drone.io/github.com/danielvargas/sipparser/status.png)]
 
-sipparser is a high performce parser for Session Initiated
-Protocol messages based on [sip_parser](https://bitbucket.org/sdr/sip_parser).  It provides a library for use in building 
-SIP user agents or any program in go that needs to be able to
-parse SIP messages.
+    import "github.com/danielvargas/sipparser"
 
-###Installation
 
-(the following step assume that you have git and go
-installed already)
-```shell
-git get github.com/danielvargas/sipparser
+### Index
+
+* [Constants](#constants)
+* [Variables](#variables)
+* [type Accept](#type-accept)
+* [type AcceptParam](#type-acceptparam)
+* [type Authorization](#type-authorization)
+    + [func (*Authorization) GetParam](#func---authorization--getparam)
+* [type CallingPartyInfo](#type-callingpartyinfo)
+* [type ContentDisposition](#type-contentdisposition)
+* [type Cseq](#type-cseq)
+* [type From](#type-from)
+* [type Header](#type-header)
+    + [func (*Header) String](#func---header--string)
+* [type PAssertedId](#type-passertedid)
+* [type Param](#type-param)
+* [type Rack](#type-rack)
+* [type Reason](#type-reason)
+* [type RemotePartyId](#type-remotepartyid)
+* [type SipMsg](#type-sipmsg)
+    + [func (*SipMsg) GetCallingParty](#func---sipmsg--getcallingparty)
+    + [func (*SipMsg) GetRURIParamBool](#func---sipmsg--getruriparambool)
+    + [func (*SipMsg) GetRURIParamVal](#func---sipmsg--getruriparamval)
+    + [func (*SipMsg) ParseContact](#func---sipmsg--parsecontact)
+    + [func (*SipMsg) ParsePAssertedId](#func---sipmsg--parsepassertedid)
+    + [func (*SipMsg) ParseRemotePartyId](#func---sipmsg--parseremotepartyid)
+* [type StartLine](#type-startline)
+* [type URI](#type-uri)
+    + [func (*URI) Parse](#func---uri--parse)
+* [type Via](#type-via)
+    + [func (*Via) AddReceived](#func---via--addreceived)
+* [type Warning](#type-warning)
+
+
+#### Constants
+```go
+const (
+	// SIP request or response
+	SIP_REQUEST  = "REQUEST"
+	SIP_RESPONSE = "RESPONSE"
+	// SIP Methods
+	SIP_METHOD_INVITE    = "INVITE"
+	SIP_METHOD_ACK       = "ACK"
+	SIP_METHOD_OPTIONS   = "OPTIONS"
+	SIP_METHOD_BYE       = "BYE"
+	SIP_METHOD_CANCEL    = "CANCEL"
+	SIP_METHOD_REGISTER  = "REGISTER"
+	SIP_METHOD_INFO      = "INFO"
+	SIP_METHOD_PRACK     = "PRACK"
+	SIP_METHOD_SUBSCRIBE = "SUBSCRIBE"
+	SIP_METHOD_NOTIFY    = "NOTIFY"
+	SIP_METHOD_UPDATE    = "UPDATE"
+	SIP_METHOD_MESSAGE   = "MESSAGE"
+	SIP_METHOD_REFER     = "REFER"
+	SIP_METHOD_PUBLISH   = "PUBLISH"
+	// SIP Headers
+	SIP_HDR_ACCEPT                        = "accept"          // RFC3261
+	SIP_HDR_ACCEPT_CONTACT                = "accept-contact"  // RFC3841
+	SIP_HDR_ACCEPT_CONTACT_CMP            = "a"               // RFC3841
+	SIP_HDR_ACCEPT_ENCODING               = "accept-encoding" //
+	SIP_HDR_ACCEPT_LANGUAGE               = "accept-language"
+	SIP_HDR_ACCEPT_RESOURCE_PRIORITY      = "accept-resource-priority" // RFC4412
+	SIP_HDR_ALERT_INFO                    = "alert-info"
+	SIP_HDR_ALLOW                         = "allow"
+	SIP_HDR_ALLOW_EVENTS                  = "allow-events"
+	SIP_HDR_ALLOW_EVENTS_CMP              = "u"
+	SIP_HDR_ANSWER_MODE                   = "answer-mode"
+	SIP_HDR_AUTHENTICATION_INFO           = "authentication-info"
+	SIP_HDR_AUTHORIZATION                 = "authorization"
+	SIP_HDR_CALL_ID                       = "call-id"
+	SIP_HDR_CALL_ID_CMP                   = "i"
+	SIP_HDR_CALL_INFO                     = "call-info"
+	SIP_HDR_CONTACT                       = "contact"
+	SIP_HDR_CONTACT_CMP                   = "m"
+	SIP_HDR_CONTENT_DISPOSITION           = "content-disposition"
+	SIP_HDR_CONTENT_ENCODING              = "content-encoding"
+	SIP_HDR_CONTENT_ENCODING_CMP          = "e"
+	SIP_HDR_CONTENT_LANGUAGE              = "content-language"
+	SIP_HDR_CONTENT_LENGTH                = "content-length"
+	SIP_HDR_CONTENT_LENGTH_CMP            = "l"
+	SIP_HDR_CONTENT_TYPE                  = "content-type"
+	SIP_HDR_CONTENT_TYPE_CMP              = "c"
+	SIP_HDR_CSEQ                          = "cseq"
+	SIP_HDR_DATE                          = "date"
+	SIP_HDR_ERROR_INFO                    = "error-info"
+	SIP_HDR_EVENT                         = "event"
+	SIP_HDR_EXPIRES                       = "expires"
+	SIP_HDR_FLOW_TIMER                    = "flow-timer"
+	SIP_HDR_FROM                          = "from"
+	SIP_HDR_FROM_CMP                      = "f"
+	SIP_HDR_HISTORY_INFO                  = "history-info"  // from RFC 4244
+	SIP_HDR_IDENTITY                      = "identity"      // RFC 4474
+	SIP_HDR_IDENTITY_CMP                  = "y"             // RFC 4474
+	SIP_HDR_IDENTITY_INFO                 = "identity-info" // RFC 4474
+	SIP_HDR_IDENTITY_INFO_CMP             = "n"             // RFC 4474
+	SIP_HDR_IN_REPLY_TO                   = "in-reply-to"
+	SIP_HDR_JOIN                          = "join" // RFC 3911
+	SIP_HDR_MAX_FORWARDS                  = "max-forwards"
+	SIP_HDR_MIME_VERSION                  = "mime-version"
+	SIP_HDR_MIN_EXPIRES                   = "min-expires"
+	SIP_HDR_MIN_SE                        = "min-se" // RFC4028
+	SIP_HDR_ORGANIZATION                  = "organization"
+	SIP_HDR_PATH                          = "path"               // RFC3327
+	SIP_HDR_PERMISSION_MISSING            = "permission-missing" // RFC5360
+	SIP_HDR_PRIORITY                      = "priority"
+	SIP_HDR_PRIVACY                       = "privacy"
+	SIP_HDR_PRIV_ANSWER_MODE              = "priv-answer-mode" // RFC 5373
+	SIP_HDR_PROXY_AUTHENTICATE            = "proxy-authenticate"
+	SIP_HDR_PROXY_AutHORIZATION           = "proxy-authorization"
+	SIP_HDR_PROXY_REQUIRE                 = "proxy-require"
+	SIP_HDR_RACK                          = "rack" // RFC 3262
+	SIP_HDR_REASON                        = "reason"
+	SIP_HDR_RECORD_ROUTE                  = "record-route"
+	SIP_HDR_REFER_SUB                     = "refer-sub"                     // RFC4488
+	SIP_HDR_REFER_TO                      = "refer-to"                      // RFC 3515, RFC 4508
+	SIP_HDR_REFERRED_BY                   = "referred-by"                   // RFC3892
+	SIP_HDR_REFERRED_BY_CMP               = "b"                             // RFC3892
+	SIP_HDR_REJECT_CONTACT                = "reject-contact"                // RFC3841
+	SIP_HDR_REJECT_CONTACT_CMP            = "j"                             // RFC3841
+	SIP_HDR_REMOTE_PARTY_ID               = "remote-party-id"               // DRAFT
+	SIP_HDR_REPLACES                      = "replaces"                      // RFC3891
+	SIP_HDR_REPLY_TO                      = "reply-to"                      // RFC3261
+	SIP_HDR_REQUEST_DISPOSITION           = "request-disposition"           // RFC3841
+	SIP_HDR_REQUIRE                       = "require"                       // RFC3261
+	SIP_HDR_RESOURCE_PRIORITY             = "resource-priority"             // RFC4412
+	SIP_HDR_RETRY_AFTER                   = "retry-after"                   // RFC3261
+	SIP_HDR_ROUTE                         = "route"                         // RFC3261
+	SIP_HDR_RSEQ                          = "rseq"                          // RFC3262
+	SIP_HDR_SECUTIRY_CLIENT               = "security-client"               // RFC3329
+	SIP_HDR_SECURITY_SERVER               = "security-server"               // RFC3329
+	SIP_HDR_SECURITY_VERIFY               = "security-verify"               // RFC3329
+	SIP_HDR_SERVER                        = "server"                        // RFC3261
+	SIP_HDR_SERVICE_ROUTE                 = "service-route"                 // RFC3608
+	SIP_HDR_SESSION_EXPIRES               = "session-expires"               // RFC4028
+	SIP_HDR_SESSION_EXPIRES_CMP           = "x"                             // RFC4028
+	SIP_HDR_SIP_ETAG                      = "sip-etag"                      // RFC3903
+	SIP_HDR_SIP_IF_MATCH                  = "sip-if-match"                  // RFC3903
+	SIP_HDR_SUBJECT                       = "subject"                       // RFC3261
+	SIP_HDR_SUBJECT_CMP                   = "s"                             // RFC3261
+	SIP_HDR_SUBSCRIPTION_STATE            = "subscription-state"            // RFC3265
+	SIP_HDR_SUPPORTED                     = "supported"                     // RFC3261
+	SIP_HDR_SUPPORTED_CMP                 = "k"                             // RFC3261
+	SIP_HDR_SUPPRESS_IF_MATCH             = "suppress-if-match"             // RFC5839
+	SIP_HDR_TARGET_DIALOG                 = "target-dialog"                 // RFC4538
+	SIP_HDR_TIMESTAMP                     = "timestamp"                     // RFC3261
+	SIP_HDR_TO                            = "to"                            // RFC3261
+	SIP_HDR_TO_CMP                        = "t"                             // RFC3261
+	SIP_HDR_TRIGGER_CONSENT               = "trigger-consent"               // RFC5360
+	SIP_HDR_UNSUPPORTED                   = "unsupported"                   // RFC3261
+	SIP_HDR_USER_AGENT                    = "user-agent"                    // RFC3261
+	SIP_HDR_VIA                           = "via"                           // RFC3261
+	SIP_HDR_VIA_CMP                       = "v"                             // RFC3261
+	SIP_HDR_WARNING                       = "warning"                       // RFC3261
+	SIP_HDR_WWW_AUTHENTICATE              = "www-authenticate"              // RFC3261
+	SIP_HDR_P_ACCESS_NETWORK_INFO         = "p-access-network-info"         // RFC3455
+	SIP_HDR_P_ANSWER_STATE                = "p-answer-state"                // RFC3455
+	SIP_HDR_P_ASSERTED_IDENTITY           = "p-asserted-identity"           // RFC3325
+	SIP_HDR_P_ASSERTED_SERVICE            = "p-asserted-service"            // RFC3455
+	SIP_HDR_P_ASSOCIATED_URI              = "p-associated-uri"              // RFC3455
+	SIP_HDR_P_CALLED_PARTY_ID             = "p-called-party-id"             // RFC3455
+	SIP_HDR_P_CHARGING_FUNCTION_ADDRESSES = "p-charging-function-addresses" // RFC3455
+	SIP_HDR_P_CHARGING_VECTOR             = "p-charging-vector"             // RFC3455
+	SIP_HDR_P_DCS_BILLING_INFO            = "p-dcs-billing-info"            // RFC5503
+	SIP_HDR_P_DCS_LAES                    = "p-dcs-laes"                    // RFC5503
+	SIP_HDR_P_DCS_OSPS                    = "p-dcs-osps"                    // RFC5503
+	SIP_HDR_P_DCS_REDIRECT                = "p-dcs-redirect"                // RFC5503
+	SIP_HDR_P_DCS_TRACE_PARTY_ID          = "p-dcs-trace-party-id"          // RFC5503
+	SIP_HDR_P_EARLY_MEDIA                 = "p-early-media"                 // RFC5009
+	SIP_HDR_P_MEDIA_AUTHORIZATION         = "p-media-authorization"         // RFC3313
+	SIP_HDR_P_PREFERRED_IDENTITY          = "p-preferred-identity"          // RFC3325
+	SIP_HDR_P_PREFERRED_SERVICE           = "p-preferred-service"           // RFC6050
+	SIP_HDR_P_PROFILE_KEY                 = "p-profile-key"                 // RFC5002
+	SIP_HDR_P_USER_DATABASE               = "p-user-database"               // RFC4457
+	SIP_HDR_P_VISITED_NETWORK_ID          = "p-visited-network-id"          // RFC3455
+)
+```
+constants just holds a common shared set of constants (i.e. hdr values)
+
+```go
+const (
+	CR                    = "\r"
+	LF                    = "\n"
+	CALLING_PARTY_DEFAULT = "default"
+	CALLING_PARTY_RPID    = "rpid"
+	CALLING_PARTY_PAID    = "paid"
+)
 ```
 
-###Usage
-
-The library has an easy to use interface.  
-
-* call sipparser.ParseMsg(msg string)
-* you'll get back a *SipMsg struct with the following:
-    + State is the last parsing state
-    + Error is an os.Error
-    + Msg is the raw msg
-    + CallingParty is a *CallingParty struct 
-    + Body is the body of the message
-    + StartLine is the parsed StartLine 
-    + Headers is a slice of *Headers and will only contain headers that do not get parsed 
-    + Accept is a *Accept struct 
-    + AlertInfo is just the string of the Alert-Info hdr
-    + Allow is a slice of strings of the methods that are allowed
-    + AllowEvents is a slice of strings of the supported event types
-    + ContentDisposition is a *ContentDisposition struct 
-    + ContentLength is the value of the Content-Length hdr
-    + ContentLengthInt is the int value of the ContentLength
-    + ContentType is the header value for the Content-Type hdr
-    +  From is a *From struct 
-    + MaxForwards is the hdr value for the Max-Forwards hdr
-    + MaxForwardsInt is the int value of the MaxForwards field
-    + Organization is the value for the Organization hdr
-    + To is a *From struct
-    + Contact is a *From struct ** NOTE ** Contact is not parsed automatically. You have to call *SipMsg.ParseContact() to get this value.
-    + ContactVal is the raw value of the contact hdr
-    + CallId is the call-id for the message
-    + Cseq is a *Cseq struct
-    + Rack is a *Rack struct
-    + Reason is a *Reason struct
-    + Rseq is the value of the RSeq hdr
-    + RseqInt is the int value of the Rseq
-    + RecordRoute is a slice of *URI's structs
-    + Route is a slice of *URI's structs 
-    + Via is a slice of *Via structs
-    + Require is a slice of the required extensions (string values) from the Require hdr
-    + Supported is a slice of the supported extensions (string values) from the Supported hdr
-    + Privacy is the value of the Privacy hdr
-    + ProxyRequire is a slice of strings from the Proxy-Require hdr
-    + RemotePartyIdVal is the value from the Remote-Party-Id hdr
-    + RemotePartyId is the RemotePartyId struct ** NOTE ** In order to actually get this value you have to call *SipMsg.ParseRemotePartyId()
-    + PAssertedIdVal is the value from the P-Asserted-Identity hdr
-    + PAssertedId is the *PAssertedId struct ** NOTE ** In order to actually get this value you have to call *SipMsg.ParsePAssertedId()
-    + Unsupported is a slice of the unsupported extensions from the Unsupported hdr
-    + UserAgent is the value of the User-Agent hdr
-    + Server is the value of the Server hdr
-    + Subject is the value of the Subject hdr
-    + Warning is a *Warning struct
-
-###SIP grammar from RFC3261
-```
-   alphanum  =  ALPHA / DIGIT
-
-   reserved    =  ";" / "/" / "?" / ":" / "@" / "&" / "=" / "+ "
-                  / "$" / ","
-   unreserved  =  alphanum / mark
-   mark        =  "-" / "_" / "." / "!" / "~" / "*" / "'"
-                  / "(" / ")"
-   escaped     =  "%" HEXDIG HEXDIG
-
-   LWS  =  [*WSP CRLF] 1*WSP ; linear whitespace
-   SWS  =  [LWS] ; sep whitespace
-
-   HCOLON  =  *( SP / HTAB ) ":" SWS
-
-   TEXT-UTF8-TRIM  =  1*TEXT-UTF8char *(*LWS TEXT-UTF8char)
-   TEXT-UTF8char   =  %x21-7E / UTF8-NONASCII
-   UTF8-NONASCII   =  %xC0-DF 1UTF8-CONT
-                   /  %xE0-EF 2UTF8-CONT
-                   /  %xF0-F7 3UTF8-CONT
-                   /  %xF8-Fb 4UTF8-CONT
-                   /  %xFC-FD 5UTF8-CONT
-   UTF8-CONT       =  %x80-BF
-
-   LHEX  =  DIGIT / %x61-66 ;lowercase a-f
-
-   token       =  1*(alphanum / "-" / "." / "!" / "%" / "*"
-                  / "_" / "+ " / "`" / "'" / "~" )
-   separators  =  "(" / ")" / "<" / ">" / "@" /
-                  "," / ";" / ":" / "\" / DQUOTE /
-                  "/" / "[" / "]" / "?" / "=" /
-                  "{" / "}" / SP / HTAB
-   word        =  1*(alphanum / "-" / "." / "!" / "%" / "*" /
-                  "_" / "+ " / "`" / "'" / "~" /
-                  "(" / ")" / "<" / ">" /
-                  ":" / "\" / DQUOTE /
-                  "/" / "[" / "]" / "?" /
-                  "{" / "}" )
-
-   STAR    =  SWS "*" SWS ; asterisk
-   SLASH   =  SWS "/" SWS ; slash
-   EQUAL   =  SWS "=" SWS ; equal
-   LPAREN  =  SWS "(" SWS ; left parenthesis
-   RPAREN  =  SWS ")" SWS ; right parenthesis
-   RAQUOT  =  ">" SWS ; right angle quote
-   LAQUOT  =  SWS "<"; left angle quote
-   COMMA   =  SWS "," SWS ; comma
-   SEMI    =  SWS ";" SWS ; semicolon
-   COLON   =  SWS ":" SWS ; colon
-   LDQUOT  =  SWS DQUOTE; open double quotation mark
-   RDQUOT  =  DQUOTE SWS ; close double quotation mark
-
-   comment  =  LPAREN *(ctext / quoted-pair / comment) RPAREN
-   ctext    =  %x21-27 / %x2A-5B / %x5D-7E / UTF8-NONASCII
-               / LWS
-
-   quoted-string  =  SWS DQUOTE *(qdtext / quoted-pair ) DQUOTE
-   qdtext         =  LWS / %x21 / %x23-5B / %x5D-7E
-                     / UTF8-NONASCII
-
-   quoted-pair  =  "\" (%x00-09 / %x0B-0C
-                   / %x0E-7F)
-
-   SIP-URI          =  "sip:" [ userinfo ] hostport
-                       uri-parameters [ headers ]
-   SIPS-URI         =  "sips:" [ userinfo ] hostport
-                       uri-parameters [ headers ]
-   userinfo         =  ( user / telephone-subscriber ) [ ":" password ] "@"
-   user             =  1*( unreserved / escaped / user-unreserved )
-   user-unreserved  =  "&" / "=" / "+ " / "$" / "," / ";" / "?" / "/"
-   password         =  *( unreserved / escaped /
-                       "&" / "=" / "+ " / "$" / "," )
-   hostport         =  host [ ":" port ]
-   host             =  hostname / IPv4address / IPv6reference
-   hostname         =  *( domainlabel "." ) toplabel [ "." ]
-   domainlabel      =  alphanum
-                       / alphanum *( alphanum / "-" ) alphanum
-   toplabel         =  ALPHA / ALPHA *( alphanum / "-" ) alphanum
-   IPv4address    =  1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT
-   IPv6reference  =  "[" IPv6address "]"
-   IPv6address    =  hexpart [ ":" IPv4address ]
-   hexpart        =  hexseq / hexseq "::" [ hexseq ] / "::" [ hexseq ]
-   hexseq         =  hex4 *( ":" hex4)
-   hex4           =  1*4HEXDIG
-   port           =  1*DIGIT
-
-   uri-parameters    =  *( ";" uri-parameter)
-   uri-parameter     =  transport-param / user-param / method-param
-                        / ttl-param / maddr-param / lr-param / other-param
-   transport-param   =  "transport="
-                        ( "udp" / "tcp" / "sctp" / "tls"
-                        / other-transport)
-   other-transport   =  token
-   user-param        =  "user=" ( "phone" / "ip" / other-user)
-   other-user        =  token
-   method-param      =  "method=" Method
-   ttl-param         =  "ttl=" ttl
-   maddr-param       =  "maddr=" host
-   lr-param          =  "lr"
-   other-param       =  pname [ "=" pvalue ]
-   pname             =  1*paramchar
-   pvalue            =  1*paramchar
-   paramchar         =  param-unreserved / unreserved / escaped
-   param-unreserved  =  "[" / "]" / "/" / ":" / "&" / "+ " / "$"
-
-   headers         =  "?" header *( "&" header )
-   header          =  hname "=" hvalue
-   hname           =  1*( hnv-unreserved / unreserved / escaped )
-   hvalue          =  *( hnv-unreserved / unreserved / escaped )
-   hnv-unreserved  =  "[" / "]" / "/" / "?" / ":" / "+ " / "$"
-
-   SIP-message    =  Request / Response
-   Request        =  Request-Line
-                     *( message-header )
-                     CRLF
-                     [ message-body ]
-   Request-Line   =  Method SP Request-URI SP SIP-Version CRLF
-   Request-URI    =  SIP-URI / SIPS-URI / absoluteURI
-   absoluteURI    =  scheme ":" ( hier-part / opaque-part )
-   hier-part      =  ( net-path / abs-path ) [ "?" query ]
-   net-path       =  "//" authority [ abs-path ]
-   abs-path       =  "/" path-segments
-   opaque-part    =  uric-no-slash *uric
-   uric           =  reserved / unreserved / escaped
-   uric-no-slash  =  unreserved / escaped / ";" / "?" / ":" / "@"
-                     / "&" / "=" / "+ " / "$" / ","
-   path-segments  =  segment *( "/" segment )
-   segment        =  *pchar *( ";" param )
-   param          =  *pchar
-   pchar          =  unreserved / escaped /
-                     ":" / "@" / "&" / "=" / "+ " / "$" / ","
-   scheme         =  ALPHA *( ALPHA / DIGIT / "+ " / "-" / "." )
-   authority      =  srvr / reg-name
-   srvr           =  [ [ userinfo "@" ] hostport ]
-   reg-name       =  1*( unreserved / escaped / "$" / ","
-                     / ";" / ":" / "@" / "&" / "=" / "+ " )
-   query          =  *uric
-   SIP-Version    =  "SIP" "/" 1*DIGIT "." 1*DIGIT
-
-   message-header  =  (Accept
-                   /  Accept-Encoding
-                   /  Accept-Language
-                   /  Alert-Info
-                   /  Allow
-                   /  Authentication-Info
-                   /  Authorization
-                   /  Call-ID
-                   /  Call-Info
-                   /  Contact
-                   /  Content-Disposition
-                   /  Content-Encoding
-                   /  Content-Language
-                   /  Content-Length
-                   /  Content-Type
-                   /  CSeq
-                   /  Date
-                   /  Error-Info
-                   /  Expires
-                   /  From
-                   /  In-Reply-To
-                   /  Max-Forwards
-                   /  MIME-Version
-                   /  Min-Expires
-                   /  Organization
-                   /  Priority
-                   /  Proxy-Authenticate
-                   /  Proxy-Authorization
-                   /  Proxy-Require
-                   /  Record-Route
-                   /  Reply-To
-                   /  Require
-                   /  Retry-After
-                   /  Route
-                   /  Server
-                   /  Subject
-                   /  Supported
-                   /  Timestamp
-                   /  To
-                   /  Unsupported
-                   /  User-Agent
-                   /  Via
-                   /  Warning
-                   /  WWW-Authenticate
-                   /  extension-header) CRLF
-
-   INVITEm           =  %x49.4E.56.49.54.45 ; INVITE in caps
-   ACKm              =  %x41.43.4B ; ACK in caps
-   OPTIONSm          =  %x4F.50.54.49.4F.4E.53 ; OPTIONS in caps
-   BYEm              =  %x42.59.45 ; BYE in caps
-   CANCELm           =  %x43.41.4E.43.45.4C ; CANCEL in caps
-   REGISTERm         =  %x52.45.47.49.53.54.45.52 ; REGISTER in caps
-   Method            =  INVITEm / ACKm / OPTIONSm / BYEm
-                        / CANCELm / REGISTERm
-                        / extension-method
-   extension-method  =  token
-   Response          =  Status-Line
-                        *( message-header )
-                        CRLF
-                        [ message-body ]
-
-   Status-Line     =  SIP-Version SP Status-Code SP Reason-Phrase CRLF
-   Status-Code     =  Informational
-                  /   Redirection
-                  /   Success
-                  /   Client-Error
-                  /   Server-Error
-                  /   Global-Failure
-                  /   extension-code
-   extension-code  =  3DIGIT
-   Reason-Phrase   =  *(reserved / unreserved / escaped
-                      / UTF8-NONASCII / UTF8-CONT / SP / HTAB)
-
-   Informational  =  "100"  ;  Trying
-                 /   "180"  ;  Ringing
-                 /   "181"  ;  Call Is Being Forwarded
-                 /   "182"  ;  Queued
-                 /   "183"  ;  Session Progress
-
-   Success  =  "200"  ;  OK
-
-   Redirection  =  "300"  ;  Multiple Choices
-               /   "301"  ;  Moved Permanently
-               /   "302"  ;  Moved Temporarily
-               /   "305"  ;  Use Proxy
-               /   "380"  ;  Alternative Service
-
-   Client-Error  =  "400"  ;  Bad Request
-                /   "401"  ;  Unauthorized
-                /   "402"  ;  Payment Required
-                /   "403"  ;  Forbidden
-                /   "404"  ;  Not Found
-                /   "405"  ;  Method Not Allowed
-                /   "406"  ;  Not Acceptable
-                /   "407"  ;  Proxy Authentication Required
-                /   "408"  ;  Request Timeout
-                /   "410"  ;  Gone
-                /   "413"  ;  Request Entity Too Large
-                /   "414"  ;  Request-URI Too Large
-                /   "415"  ;  Unsupported Media Type
-                /   "416"  ;  Unsupported URI Scheme
-                /   "420"  ;  Bad Extension
-                /   "421"  ;  Extension Required
-                /   "423"  ;  Interval Too Brief
-                /   "480"  ;  Temporarily not available
-                /   "481"  ;  Call Leg/Transaction Does Not Exist
-                /   "482"  ;  Loop Detected
-                /   "483"  ;  Too Many Hops
-                /   "484"  ;  Address Incomplete
-                /   "485"  ;  Ambiguous
-                /   "486"  ;  Busy Here
-                /   "487"  ;  Request Terminated
-                /   "488"  ;  Not Acceptable Here
-                /   "491"  ;  Request Pending
-                /   "493"  ;  Undecipherable
-
-   Server-Error  =  "500"  ;  Internal Server Error
-                /   "501"  ;  Not Implemented
-                /   "502"  ;  Bad Gateway
-                /   "503"  ;  Service Unavailable
-                /   "504"  ;  Server Time-out
-                /   "505"  ;  SIP Version not supported
-                /   "513"  ;  Message Too Large
-
-   Global-Failure  =  "600"  ;  Busy Everywhere
-                  /   "603"  ;  Decline
-                  /   "604"  ;  Does not exist anywhere
-                  /   "606"  ;  Not Acceptable
-
-   Accept         =  "Accept" HCOLON
-                      [ accept-range *(COMMA accept-range) ]
-   accept-range   =  media-range *(SEMI accept-param)
-   ; Why not SLASH ? //PPe
-   media-range    =  ( "*" "/" "*"
-                     / ( m-type SLASH "*" )
-                     / ( m-type SLASH m-subtype )
-                     ) *( SEMI m-parameter )
-   accept-param   =  ("q" EQUAL qvalue) / generic-param
-   qvalue         =  ( "0" [ "." 0*3DIGIT ] )
-                     / ( "1" [ "." 0*3("0") ] )
-   generic-param  =  token [ EQUAL gen-value ]
-   gen-value      =  token / host / quoted-string
-
-   Accept-Encoding  =  "Accept-Encoding" HCOLON
-                        [ encoding *(COMMA encoding) ]
-   encoding         =  codings *(SEMI accept-param)
-   codings          =  content-coding / "*"
-   content-coding   =  token
-
-   Accept-Language  =  "Accept-Language" HCOLON
-                        [ language *(COMMA language) ]
-   language         =  language-range *(SEMI accept-param)
-   language-range   =  ( ( 1*8ALPHA *( "-" 1*8ALPHA ) ) / "*" )
-
-   Alert-Info   =  "Alert-Info" HCOLON alert-param *(COMMA alert-param)
-   alert-param  =  LAQUOT absoluteURI RAQUOT *( SEMI generic-param )
-
-   Allow  =  "Allow" HCOLON [Method *(COMMA Method)]
-
-   Authorization     =  "Authorization" HCOLON credentials
-   credentials       =  ("Digest" LWS digest-response)
-                        / other-response
-   digest-response   =  dig-resp *(COMMA dig-resp)
-   dig-resp          =  username / realm / nonce / digest-uri
-                         / dresponse / algorithm / cnonce
-                         / opaque / message-qop
-                         / nonce-count / auth-param
-   username          =  "username" EQUAL username-value
-   username-value    =  quoted-string
-   digest-uri        =  "uri" EQUAL LDQUOT digest-uri-value RDQUOT
-   digest-uri-value  =  rquest-uri ; Equal to request-uri as specified
-                        by HTTP/1.1
-   message-qop       =  "qop" EQUAL qop-value
-   cnonce            =  "cnonce" EQUAL cnonce-value
-   cnonce-value      =  nonce-value
-   nonce-count       =  "nc" EQUAL nc-value
-   nc-value          =  8LHEX
-   dresponse         =  "response" EQUAL request-digest
-   request-digest    =  LDQUOT 32LHEX RDQUOT
-   auth-param        =  auth-param-name EQUAL
-                        ( token / quoted-string )
-   auth-param-name   =  token
-   other-response    =  auth-scheme LWS auth-param
-                        *(COMMA auth-param)
-   auth-scheme       =  token
-
-   Authentication-Info  =  "Authentication-Info" HCOLON ainfo
-                           *(COMMA ainfo)
-   ainfo                =  nextnonce / message-qop
-                            / response-auth / cnonce
-                            / nonce-count
-   nextnonce            =  "nextnonce" EQUAL nonce-value
-   response-auth        =  "rspauth" EQUAL response-digest
-   response-digest      =  LDQUOT *LHEX RDQUOT
-
-   Call-ID  =  ( "Call-ID" / "i" ) HCOLON callid
-   callid   =  word [ "@" word ]
-
-   Call-Info   =  "Call-Info" HCOLON info *(COMMA info)
-   info        =  LAQUOT absoluteURI RAQUOT *( SEMI info-param)
-   info-param  =  ( "purpose" EQUAL ( "icon" / "info"
-                  / "card" / token ) ) / generic-param
-
-   Contact        =  ("Contact" / "m" ) HCOLON
-                     ( STAR / (contact-param *(COMMA contact-param)))
-   contact-param  =  (name-addr / addr-spec) *(SEMI contact-params)
-   name-addr      =  [ display-name ] LAQUOT addr-spec RAQUOT
-   addr-spec      =  SIP-URI / SIPS-URI / absoluteURI
-   display-name   =  *(token LWS)/ quoted-string
-
-   contact-params     =  c-p-q / c-p-expires
-                         / contact-extension
-   c-p-q              =  "q" EQUAL qvalue
-   c-p-expires        =  "expires" EQUAL delta-seconds
-   contact-extension  =  generic-param
-   delta-seconds      =  1*DIGIT
-
-   Content-Disposition   =  "Content-Disposition" HCOLON
-                            disp-type *( SEMI disp-param )
-   disp-type             =  "render" / "session" / "icon" / "alert"
-                            / disp-extension-token
-   disp-param            =  handling-param / generic-param
-   handling-param        =  "handling" EQUAL
-                            ( "optional" / "required"
-                            / other-handling )
-   other-handling        =  token
-   disp-extension-token  =  token
-
-   Content-Encoding  =  ( "Content-Encoding" / "e" ) HCOLON
-                        content-coding *(COMMA content-coding)
-
-   Content-Language  =  "Content-Language" HCOLON
-                        language-tag *(COMMA language-tag)
-   language-tag      =  primary-tag *( "-" subtag )
-   primary-tag       =  1*8ALPHA
-   subtag            =  1*8ALPHA
-
-   Content-Length  =  ( "Content-Length" / "l" ) HCOLON 1*DIGIT
-   Content-Type     =  ( "Content-Type" / "c" ) HCOLON media-type
-   media-type       =  m-type SLASH m-subtype *(SEMI m-parameter)
-   m-type           =  discrete-type / composite-type
-   discrete-type    =  "text" / "image" / "audio" / "video"
-                       / "application" / extension-token
-   composite-type   =  "message" / "multipart" / extension-token
-   extension-token  =  ietf-token / x-token
-   ietf-token       =  token
-   x-token          =  "x-" token
-   m-subtype        =  extension-token / iana-token
-   iana-token       =  token
-   m-parameter      =  m-attribute EQUAL m-value
-   m-attribute      =  token
-   m-value          =  token / quoted-string
-
-   CSeq  =  "CSeq" HCOLON 1*DIGIT LWS Method
-
-   Date          =  "Date" HCOLON SIP-date
-   SIP-date      =  rfc1123-date
-   rfc1123-date  =  wkday "," SP date1 SP time SP "GMT"
-   date1         =  2DIGIT SP month SP 4DIGIT
-                    ; day month year (e.g., 02 Jun 1982)
-   time          =  2DIGIT ":" 2DIGIT ":" 2DIGIT
-                    ; 00:00:00 - 23:59:59
-   wkday         =  "Mon" / "Tue" / "Wed"
-                    / "Thu" / "Fri" / "Sat" / "Sun"
-   month         =  "Jan" / "Feb" / "Mar" / "Apr"
-                    / "May" / "Jun" / "Jul" / "Aug"
-                    / "Sep" / "Oct" / "Nov" / "Dec"
-
-   Error-Info  =  "Error-Info" HCOLON error-uri *(COMMA error-uri)
-   error-uri   =  LAQUOT absoluteURI RAQUOT *( SEMI generic-param )
-
-   Expires     =  "Expires" HCOLON delta-seconds
-   From        =  ( "From" / "f" ) HCOLON from-spec
-   from-spec   =  ( name-addr / addr-spec )
-                  *( SEMI from-param )
-   from-param  =  tag-param / generic-param
-   tag-param   =  "tag" EQUAL token
-
-   In-Reply-To  =  "In-Reply-To" HCOLON callid *(COMMA callid)
-
-   Max-Forwards  =  "Max-Forwards" HCOLON 1*DIGIT
-
-   MIME-Version  =  "MIME-Version" HCOLON 1*DIGIT "." 1*DIGIT
-
-   Min-Expires  =  "Min-Expires" HCOLON delta-seconds
-
-   Organization  =  "Organization" HCOLON [TEXT-UTF8-TRIM]
-
-   Priority        =  "Priority" HCOLON priority-value
-   priority-value  =  "emergency" / "urgent" / "normal"
-                      / "non-urgent" / other-priority
-   other-priority  =  token
-
-   Proxy-Authenticate  =  "Proxy-Authenticate" HCOLON challenge
-   challenge           =  ("Digest" LWS digest-cln *(COMMA digest-cln))
-                          / other-challenge
-   other-challenge     =  auth-scheme LWS auth-param
-                          *(COMMA auth-param)
-   digest-cln          =  realm / domain / nonce
-                           / opaque / stale / algorithm
-                           / qop-options / auth-param
-   realm               =  "realm" EQUAL realm-value
-   realm-value         =  quoted-string
-   domain              =  "domain" EQUAL LDQUOT URI
-                          *( 1*SP URI ) RDQUOT
-   URI                 =  absoluteURI / abs-path
-   nonce               =  "nonce" EQUAL nonce-value
-   nonce-value         =  quoted-string
-   opaque              =  "opaque" EQUAL quoted-string
-   stale               =  "stale" EQUAL ( "true" / "false" )
-   algorithm           =  "algorithm" EQUAL ( "MD5" / "MD5-sess"
-                          / token )
-   qop-options         =  "qop" EQUAL LDQUOT qop-value
-                          *("," qop-value) RDQUOT
-   qop-value           =  "auth" / "auth-int" / token
-
-   Proxy-Authorization  =  "Proxy-Authorization" HCOLON credentials
-
-   Proxy-Require  =  "Proxy-Require" HCOLON option-tag
-                     *(COMMA option-tag)
-   option-tag     =  token
-
-   Record-Route  =  "Record-Route" HCOLON rec-route *(COMMA rec-route)
-   rec-route     =  name-addr *( SEMI rr-param )
-   rr-param      =  generic-param
-
-   Reply-To      =  "Reply-To" HCOLON rplyto-spec
-   rplyto-spec   =  ( name-addr / addr-spec )
-                    *( SEMI rplyto-param )
-   rplyto-param  =  generic-param
-   Require       =  "Require" HCOLON option-tag *(COMMA option-tag)
-
-   Retry-After  =  "Retry-After" HCOLON delta-seconds
-                   [ comment ] *( SEMI retry-param )
-
-   retry-param  =  ("duration" EQUAL delta-seconds)
-                   / generic-param
-
-   Route        =  "Route" HCOLON route-param *(COMMA route-param)
-   route-param  =  name-addr *( SEMI rr-param )
-
-   Server           =  "Server" HCOLON server-val *(LWS server-val)
-   server-val       =  product / comment
-   product          =  token [SLASH product-version]
-   product-version  =  token
-
-   Subject  =  ( "Subject" / "s" ) HCOLON [TEXT-UTF8-TRIM]
-
-   Supported  =  ( "Supported" / "k" ) HCOLON
-                 [option-tag *(COMMA option-tag)]
-
-   Timestamp  =  "Timestamp" HCOLON 1*(DIGIT)
-                  [ "." *(DIGIT) ] [ LWS delay ]
-   delay      =  *(DIGIT) [ "." *(DIGIT) ]
-
-   To        =  ( "To" / "t" ) HCOLON ( name-addr
-                / addr-spec ) *( SEMI to-param )
-   to-param  =  tag-param / generic-param
-
-   Unsupported  =  "Unsupported" HCOLON option-tag *(COMMA option-tag)
-   User-Agent  =  "User-Agent" HCOLON server-val *(LWS server-val)
-
-   Via               =  ( "Via" / "v" ) HCOLON via-parm *(COMMA via-parm)
-   via-parm          =  sent-protocol LWS sent-by *( SEMI via-params )
-   via-params        =  via-ttl / via-maddr
-                        / via-received / via-branch
-                        / via-extension
-   via-ttl           =  "ttl" EQUAL ttl
-   via-maddr         =  "maddr" EQUAL host
-   via-received      =  "received" EQUAL (IPv4address / IPv6address)
-   via-branch        =  "branch" EQUAL token
-   via-extension     =  generic-param
-   sent-protocol     =  protocol-name SLASH protocol-version
-                        SLASH transport
-   protocol-name     =  "SIP" / token
-   protocol-version  =  token
-   transport         =  "UDP" / "TCP" / "TLS" / "SCTP"
-                        / other-transport
-   sent-by           =  host [ COLON port ]
-   ttl               =  1*3DIGIT ; 0 to 255
-
-   Warning        =  "Warning" HCOLON warning-value *(COMMA warning-value)
-   warning-value  =  warn-code SP warn-agent SP warn-text
-   warn-code      =  3DIGIT
-   warn-agent     =  hostport / pseudonym
-                     ;  the name or pseudonym of the server adding
-                     ;  the Warning header, for use in debugging
-   warn-text      =  quoted-string
-   pseudonym      =  token
-
-   WWW-Authenticate  =  "WWW-Authenticate" HCOLON challenge
-
-   extension-header  =  header-name HCOLON header-value
-   header-name       =  token
-   header-value      =  *(TEXT-UTF8char / UTF8-CONT / LWS)
-   message-body  =  *OCTET
-```
-###Note: cleanWs improvement
-
-```
-This is a top 20 sample I took before modifying the cleanWs function in 
-sipparser/utils.go.
-
-The initial version of cleanWs looped through each char in the string
-and compared characters.  This version occupied 80%+  of the time in
-the bench program.  The new version uses the strings package to trim the 
-space at the end of the line then loop through the returned slice of strings.
-The net result is a 7X improvement in speed of the bench program and a reduction
-of the time spent to just over 20%.   
-
-before the modification:
-Total: 1802 samples
-     203  11.3%  11.3%     1098  60.9% runtime.mallocgc
-     128   7.1%  18.4%      347  19.3% sweep
-     112   6.2%  24.6%      129   7.2% MCentral_Alloc
-     110   6.1%  30.7%     1494  82.9% sipparser.cleanWs
-      92   5.1%  35.8%      434  24.1% runtime.MCache_Alloc
-      89   4.9%  40.7%      598  33.2% concatstring
-      85   4.7%  45.4%       85   4.7% runtime.mcpy
-      80   4.4%  49.9%       80   4.4% runtime.memclr
-      79   4.4%  54.3%      229  12.7% runtime.MCache_Free
-      75   4.2%  58.4%     1124  62.4% runtime.gostringsize
-      70   3.9%  62.3%      120   6.7% MCentral_Free
-      60   3.3%  65.6%      756  42.0% runtime.intstring
-      53   2.9%  68.6%       53   2.9% runtime.markallocated
-      50   2.8%  71.4%       50   2.8% runtime.stringiter
-      50   2.8%  74.1%       50   2.8% scanblock
-      44   2.4%  76.6%       44   2.4% runtime.SizeToClass
-      41   2.3%  78.9%       41   2.3% runtime.MHeap_Lookup
-      40   2.2%  81.1%       40   2.2% runtime.markspan
-      33   1.8%  82.9%       33   1.8% runtime.MSpanList_IsEmpty
-      30   1.7%  84.6%      341  18.9% runtime.MCentral_AllocList
-
-after the modification:
-Total: 254 samples
-      18   7.1%   7.1%       18   7.1% runtime.stringiter
-      14   5.5%  12.6%       38  15.0% sipparser.getCrlf
-      13   5.1%  17.7%       14   5.5% sipparser.getHdrFunc
-      11   4.3%  22.0%       11   4.3% MCentral_Alloc
-       9   3.5%  25.6%       78  30.7% runtime.mallocgc
-       9   3.5%  29.1%        9   3.5% strings.Count
-       9   3.5%  32.7%       22   8.7% sweep
-       8   3.1%  35.8%       38  15.0% runtime.MCache_Alloc
-       6   2.4%  38.2%       12   4.7% MHeap_AllocLocked
-       6   2.4%  40.6%       14   5.5% runtime.MCache_Free
-       6   2.4%  42.9%       30  11.8% runtime.makeslice
-       6   2.4%  45.3%       60  23.6% sipparser.cleanWs
-       6   2.4%  47.6%      184  72.4% sipparser.getHeaders
-       5   2.0%  49.6%        6   2.4% MCentral_Free
-       5   2.0%  51.6%       19   7.5% runtime.growslice
-       5   2.0%  53.5%        5   2.0% scanblock
-       5   2.0%  55.5%        9   3.5% sipparser.getBracks
-       5   2.0%  57.5%       33  13.0% sipparser.parseUriHost
-       5   2.0%  59.4%       30  11.8% strings.Map
-       4   1.6%  61.0%       34  13.4% makeslice1
+```go
+const (
+	SIP_SCHEME  = "sip"
+	SIPS_SCHEME = "sips"
+	TEL_SCHEME  = "tel"
+)
 ```
 
-###License
+#### Variables
 
-The project is governed by a BSD license that can be found in the LICENSE.txt file.
+```go
+var (
+	SIP_METHODS = []string{
+		SIP_METHOD_INVITE,
+		SIP_METHOD_ACK,
+		SIP_METHOD_OPTIONS,
+		SIP_METHOD_BYE,
+		SIP_METHOD_CANCEL,
+		SIP_METHOD_REGISTER,
+		SIP_METHOD_INFO,
+		SIP_METHOD_PRACK,
+		SIP_METHOD_SUBSCRIBE,
+		SIP_METHOD_NOTIFY,
+		SIP_METHOD_UPDATE,
+		SIP_METHOD_MESSAGE,
+		SIP_METHOD_REFER,
+		SIP_METHOD_PUBLISH,
+	}
+)
+```
+
+#### type [Accept](#accept)
+
+```go
+type Accept struct {
+	// Val is the raw value
+	Val string
+	// Params is a slice of AcceptParam
+	Params []*AcceptParam
+}
+```
+
+Accept is a struct that holds the following: -- the raw value -- a slice of
+parced AcceptParam
+
+#### type [AcceptParam](#acceptparam)
+
+```go
+type AcceptParam struct {
+	Type string
+	Val  string
+}
+```
+
+AcceptParam is just a key:value pair of params for the accept header
+
+#### type [Authorization](#authorization)
+
+```go
+type Authorization struct {
+	Val         string   "val"
+	Credentials string   "credentials"
+	Params      []*Param "params"
+}
+```
+
+
+#### func (*Authorization) [GetParam](#getparam)
+
+```go
+func (a *Authorization) GetParam(param string) *Param
+```
+
+#### type [CallingPartyInfo](#callingpartyinfo)
+
+```go
+type CallingPartyInfo struct {
+	// Name the name
+	Name string
+	// Number the number
+	Number string
+	// Anonymous a bool to see if this should be anonymous or not
+	Anonymous bool
+}
+```
+
+CallingPartyInfo is a struct of calling party information. This is populated
+into the *SipMsg.CallingParty field when the method GetCallingParty on the
+*SipMsg. See below for details of that method.
+
+#### type [ContentDisposition](#contentdisposition)
+
+```go
+type ContentDisposition struct {
+	// Val is the raw value
+	Val string
+	// DispType is the display type
+	DispType string
+	// Params is a slice of *Param
+	Params []*Param
+}
+```
+
+ContentDisposition is a struct that holds a parsed content-disposition hdr: --
+Val is the raw value -- DispType is the display type -- Params is slice of
+parameters
+
+#### type [Cseq](#cseq)
+
+```go
+type Cseq struct {
+	// Val is the raw value
+	Val string
+	// Method is the SIP method
+	Method string
+	// Digit is the digit
+	Digit string
+}
+```
+
+Cseq is a struct that holds the values for a cseq header:
+
+    -- Val is the raw string value of the cseq hdr
+    -- Method is the SIP method
+    -- Digit is the numeric indicator for the method
+
+#### type [From](#from)
+
+```go
+type From struct {
+	// Error is an error
+	Error error
+	// Val is the raw value
+	Val string
+	// Name is the name value
+	Name string
+	// Tag is the tag value
+	Tag string
+	// URI is a parsed uri
+	URI *URI
+	// Params are for any generic params that are part of the header
+	Params []*Param
+}
+```
+
+from holds a parsed header that has a format like: "NAME"
+<sip:user@hostinfo>;param=val and is used for the parsing of the from, to, and
+contact header in the parser program From holds the following public fields:
+
+#### type [Header](#header)
+
+```go
+type Header struct {
+	Header string
+	Val    string
+}
+```
+
+
+#### func (*Header) [String](#string)
+
+```go
+func (h *Header) String() string
+```
+
+#### type [PAssertedId](#passertedid)
+
+```go
+type PAssertedId struct {
+	Error  error
+	Val    string
+	Name   string
+	URI    *URI
+	Params []*Param
+}
+```
+
+PAssertedId is a struct that holds: -- Error is just an os.Error -- Val is the
+raw value -- Name is the name value from the p-asserted-id hdr -- URI is the
+parsed uri from the p-asserted-id hdr -- Params is a slice of the *Params from
+the p-asserted-id hdr
+
+#### type [Param](#param)
+
+```go
+type Param struct {
+	Param string "param"
+	Val   string "val"
+}
+```
+
+Param is just a struct that holds a parameter and a value As an example of this
+would be something like user=phone
+
+#### type [Rack](#rack)
+
+```go
+type Rack struct {
+	Val        string // Val is the raw value
+	RseqVal    string // RseqVal is the value of the rseq
+	CseqVal    string // CseqVal is the value of the cseq
+	CseqMethod string // CseqMethod is the value of the cseq method
+}
+```
+
+
+#### type [Reason](#reason)
+
+```go
+type Reason struct {
+	Val   string
+	Proto string
+	Cause string
+	Text  string
+}
+```
+
+Reason is a struct that holds a parsed reason hdr Fields are as follows: -- Val
+is the raw value -- Proto is the protocol (i.e. SIP) -- Cause is the cause code
+(i.e. 41) -- Text is the actual text response
+
+#### type [RemotePartyId](#remotepartyid)
+
+```go
+type RemotePartyId struct {
+	Error   error
+	Val     string // Val is the raw value of the hdr
+	Name    string // Name is the name from the header
+	URI     *URI
+	Party   string
+	Screen  string
+	Privacy string
+	Params  []*Param
+}
+```
+
+
+#### type [SipMsg](#sipmsg)
+
+```go
+type SipMsg struct {
+	State              string
+	Error              error
+	Msg                string
+	CallingParty       *CallingPartyInfo
+	Body               string
+	StartLine          *StartLine
+	Headers            []*Header
+	Accept             *Accept
+	AlertInfo          string
+	Allow              []string
+	AllowEvents        []string
+	Authorization      *Authorization
+	ContentDisposition *ContentDisposition
+	ContentLength      string
+	ContentLengthInt   int
+	ContentType        string
+	From               *From
+	MaxForwards        string
+	MaxForwardsInt     int
+	Organization       string
+	To                 *From
+	Contact            *From
+	ContactVal         string
+	CallId             string
+	Cseq               *Cseq
+	Rack               *Rack
+	Reason             *Reason
+	Rseq               string
+	RseqInt            int
+	RecordRoute        []*URI
+	Route              []*URI
+	Via                []*Via
+	Require            []string
+	Supported          []string
+	Privacy            string
+	ProxyAuthenticate  *Authorization
+	ProxyRequire       []string
+	RemotePartyIdVal   string
+	RemotePartyId      *RemotePartyId
+	PAssertedIdVal     string
+	PAssertedId        *PAssertedId
+	Unsupported        []string
+	UserAgent          string
+	Server             string
+	Subject            string
+	Warning            *Warning
+	WWWAuthenticate    *Authorization
+}
+```
+
+
+#### func  [ParseMsg](#parsemsg)
+
+```go
+func ParseMsg(str string) (s *SipMsg)
+```
+
+#### func (*SipMsg) [GetCallingParty](#getcallingparty)
+
+```go
+func (s *SipMsg) GetCallingParty(str string) error
+```
+
+#### func (*SipMsg) [GetRURIParamBool](#getruriparambool)
+
+```go
+func (s *SipMsg) GetRURIParamBool(str string) bool
+```
+
+#### func (*SipMsg) [GetRURIParamVal](#getruriparamval)
+
+```go
+func (s *SipMsg) GetRURIParamVal(str string) string
+```
+
+#### func (*SipMsg) [ParseContact](#parsecontact)
+
+```go
+func (s *SipMsg) ParseContact(str string)
+```
+
+#### func (*SipMsg) [ParsePAssertedId](#parsepassertedid)
+
+```go
+func (s *SipMsg) ParsePAssertedId(str string)
+```
+
+#### func (*SipMsg) [ParseRemotePartyId](#parseremotepartyid)
+
+```go
+func (s *SipMsg) ParseRemotePartyId(str string)
+```
+
+#### type [StartLine](#startline)
+
+```go
+type StartLine struct {
+	Error    error  "err"
+	Val      string "val"      // Val is the raw value
+	Type     string "type"     // Type is the type of startline (i.e. request or response)
+	Method   string "method"   // Method is the method (if request)
+	URI      *URI   "uri"      // URI is the *URI (if request)
+	Resp     string "resp"     // Resp is the response code (i.e. 183)
+	RespText string "resptext" // RespText is the response text (i.e. "Session Progress")
+	Proto    string "proto"    // Proto is the protocol (should be "SIP")
+	Version  string "version"  // Version is the version (should be "2.0")
+}
+```
+
+
+#### func  [ParseStartLine](#parsestartline)
+
+```go
+func ParseStartLine(str string) *StartLine
+```
+
+#### type [URI](#uri)
+
+```go
+type URI struct {
+	Error        error  // error if any
+	Scheme       string // scheme .. i.e. tel, sip, sips,etc.
+	Raw          string // this is the actual raw uri unparsed
+	UserInfo     string // this is everything before the "@"
+	User         string // this is the actual called party
+	UserPassword string // this is the password (i.e. alice:passwd@bob.com)
+	HostInfo     string // this is everything after the @ or the entire uri
+	Host         string // the host in the uri
+	Port         string // the port
+	UriParams    []*Param
+	Secure       bool // Indicates SIP-URI or SIPS-URI (true for SIPS-URI)
+}
+```
+
+URI is a struct that holds an error (hopefully nil), the raw value, and the
+parsed uri. Fields are as follows: -- Error is the error (or nil) -- Scheme is
+the scheme (i.e. sip) -- Raw is the raw value of the uri -- UserInfo is the
+user:password;userparams=foo; -- User is the user (i.e. the phone number) --
+UserPassword is the user password -- HostInfo is the host:port combination --
+Host is the host -- Port is the port (if any) -- UriParams are the uri's
+parameters -- Secure is if the scheme is "sips" -- atPos is just used by the
+parser to identify where the
+
+    "@" char is in the .Raw field (or 0 if not present)
+
+#### func  [NewURI](#newuri)
+
+```go
+func NewURI(s string) *URI
+```
+NewURI is a convenience function that creates a *URI for you
+
+#### func  [ParseURI](#parseuri)
+
+```go
+func ParseURI(s string) *URI
+```
+ParseURI is NewURI ... but also parses it
+
+#### func (*URI) [Parse](#parse)
+
+```go
+func (u *URI) Parse()
+```
+Parse parses the .Raw field
+
+#### type [Via](#via)
+
+```go
+type Via struct {
+	State     string // State is the parser state
+	Error     error  // Error is an error
+	Via       string // Via is the raw value
+	Proto     string // Proto is the protocol (i.e. "SIP")
+	Version   string // Version is the version (i.e. "2.0")
+	Transport string // Transport is the transport method (i.e. "UDP")
+	SentBy    string // SentBy is a host:port combination
+	Branch    string // Branch is the branch parameter
+	Received  string
+	RPort     string
+	Params    []*Param
+}
+```
+
+Via is an important part of the *SipMsg. It is a fundamental basis on which to
+build route-sets and do call matching. It has the following structs:
+
+#### func (*Via) [AddReceived](#addreceived)
+
+```go
+func (v *Via) AddReceived(s string)
+```
+
+#### type [Warning](#warning)
+
+```go
+type Warning struct {
+	Val   string
+	Code  string
+	Agent string
+	Text  string
+}
+```
